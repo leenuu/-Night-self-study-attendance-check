@@ -1,5 +1,6 @@
 import pyzbar.pyzbar as pyzbar 
-import numpy as np import cv2
+import numpy as np 
+import cv2
 from test import *
 def cam():
     capture = cv2.VideoCapture(1)
