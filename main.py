@@ -21,7 +21,7 @@ class attendance:
         xlsx = files.active
         while True:
             if xlsx.cell(row=num, column=1).value != None:
-                users.append(xlsx.cell(row=num, column=1).value)
+                users.append(str(xlsx.cell(row=num, column=1).value))
                 num = num + 1
             else:
                 break
@@ -35,7 +35,7 @@ class attendance:
 
         while True:
             if xlsx.cell(row=num, column=1).value != None:
-                data[xlsx.cell(row=num, column=1).value] = {"last_date" : str(xlsx.cell(row=num, column=2).value).split(' ')[0], "count" : int(xlsx.cell(row=num, column=5).value), "first_day" : str(xlsx.cell(row=num, column=3).value).split(','),"second_day" : (lambda text: None if text == None else str(xlsx.cell(row=num, column=4).value).split(','))(str(xlsx.cell(row=num, column=3).value)) , "check_time": None}
+                data[str(xlsx.cell(row=num, column=1).value)] = {"last_date" : str(xlsx.cell(row=num, column=2).value).split(' ')[0], "count" : int(xlsx.cell(row=num, column=5).value), "first_day" : str(xlsx.cell(row=num, column=3).value).split(','),"second_day" : (lambda text: None if text == None else str(xlsx.cell(row=num, column=4).value).split(','))(str(xlsx.cell(row=num, column=3).value)) , "check_time": None}
             elif xlsx.cell(row=num, column=1).value == None:
                 break
             num = num + 1
@@ -77,8 +77,8 @@ class attendance:
 
         while True:
             if ds.cell(row=num-1, column=1).value != None:
-                ws.cell(row=num, column=1).value = ds.cell(row=num-1, column=1).value
-                ws.cell(row=num, column=2).value = self.data[ds.cell(row=num-1, column=1).value]["count"]    
+                ws.cell(row=num, column=1).value = str(ds.cell(row=num-1, column=1).value)
+                ws.cell(row=num, column=2).value = self.data[str(ds.cell(row=num-1, column=1).value)]["count"]    
                 
             elif ds.cell(row=num-1, column=1).value == None:
                 break
@@ -101,7 +101,7 @@ class attendance:
                 num = 2
                 while True:
                     if ds.cell(row=num, column=1).value != None:
-                       self.data[ds.cell(row=num, column=1).value]["check_time"] = ds.cell(row=num, column=self.col_date).value
+                       self.data[str(ds.cell(row=num, column=1).value)]["check_time"] = ds.cell(row=num, column=self.col_date).value
                     #    print(ds.cell(row=num, column=self.col_date).value)
                     else:
                         break
@@ -122,12 +122,12 @@ class attendance:
 
         user_num = 2
         while True:
-            if ds.cell(row=user_num, column=1).value == user:
+            if str(ds.cell(row=user_num, column=1).value) == str(user):
                 if ds.cell(row=user_num, column=self.col_date).value == None:
-                    ds.cell(row=user_num, column=self.col_date).value = str(self.data[user]["check_time"]) + "/"
+                    ds.cell(row=user_num, column=self.col_date).value = str(self.data[str(user)]["check_time"]) + "/"
                 else:
-                    ds.cell(row=user_num, column=self.col_date).value = str(ds.cell(row=user_num, column=self.col_date).value) + str(self.data[user]["check_time"]) + "/"
-                ds.cell(row=user_num, column=2).value = self.data[ds.cell(row=user_num-1, column=1).value]["count"]    
+                    ds.cell(row=user_num, column=self.col_date).value = str(ds.cell(row=user_num, column=self.col_date).value) + str(self.data[str(user)]["check_time"]) + "/"
+                ds.cell(row=user_num, column=2).value = self.data[str(user)]["count"]    
                 break
             user_num = user_num + 1
         files.save("schedule.xlsx")
@@ -204,7 +204,7 @@ class attendance:
 at = attendance()
 # print(at.data["031401-강일우"])
 
-at.run()
+# at.run()
 # at.schedule_init()
 # at.schedule_edit()
 
