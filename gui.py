@@ -41,7 +41,8 @@ class Ui_Form(object):
         QtCore.QMetaObject.connectSlotsByName(Form)
 
         self.save_brt.clicked.connect(self.attend)
-        self.setup_()
+        self.setup_pos()
+        self.mapping()
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
@@ -61,9 +62,9 @@ class Ui_Form(object):
                 self.att.schedule_check(user)
                 self.label_txt.setText(_translate("Form","출석완료."))
                 if self.att.data[user]["second_day"] != ['None'] and len(str(self.att.data[user]["check_time"])) <= 10:
-                    self.labels[f"{user}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                    self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
                 elif self.att.data[user]["second_day"] == ['None']:
-                    self.labels[f"{user}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                    self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
 
                 print("출석완료.")
                 print('\n',end='')
@@ -71,7 +72,7 @@ class Ui_Form(object):
             elif self.att.check_time(self.att.data[user]["check_time"]):
                 self.att.data[user]["check_time"] = self.att.data[user]["check_time"] + str(datetime.today().strftime("%H:%M:%S"))
                 self.att.schedule_check(user)
-                self.labels[f"{user}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
                 self.label_txt.setText(_translate("Form","출석완료."))
                 print("출석완료.")
                 print('\n',end='')
@@ -89,59 +90,117 @@ class Ui_Form(object):
         self.input_user.setText("")
 
 
-    def setup_(self):
-        x = 1
-        y = 1
+    def setup_pos(self):
+        x = 16
+        xi = 1
+        y = 925
         _translate = QtCore.QCoreApplication.translate
         font = QtGui.QFont()
         font.setFamily("한컴산뜻돋움")
         font.setPointSize(12)
         font.setBold(True)
         print(len(self.att.users))
-        n= 0
+        n = 1
+        st = 0
         while True:
-            print(self.att.users[n])
-            self.frames[f"{self.att.users[n]}"] = QtWidgets.QFrame(Form)
-            self.frames[f"{self.att.users[n]}"].setGeometry(QtCore.QRect(81 + (x - 1) * 65, 10 + (y - 1) * 61, 61 , 46))
-            self.frames[f"{self.att.users[n]}"].setFrameShape(QtWidgets.QFrame.Box) 
-            self.frames[f"{self.att.users[n]}"].setFrameShadow(QtWidgets.QFrame.Plain)
-            self.frames[f"{self.att.users[n]}"].setLineWidth(2)
-            self.frames[f"{self.att.users[n]}"].setObjectName("frame")
-            # self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800") #green
-            # self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c") #gray
-            # self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d") #yellow
-            self.labels[f"{self.att.users[n]}"] = QtWidgets.QLabel(self.frames[f"{self.att.users[n]}"])
-            self.labels[f"{self.att.users[n]}"].setGeometry(QtCore.QRect(2, 2, 57, 42))
-            if self.att.data[f"{self.att.users[n]}"]["check_time"] == None:
-                self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
-            elif self.att.data[self.att.users[n]]["second_day"] != ['None'] and len(str(self.att.data[self.att.users[n]]["check_time"])) <= 10:
-                self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
-            elif self.att.data[self.att.users[n]]["second_day"] == ['None'] and len(str(self.att.data[self.att.users[n]]["check_time"])) <= 10:
-                self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-            elif self.att.data[self.att.users[n]]["second_day"] != ['None'] and len(str(self.att.data[self.att.users[n]]["check_time"])) > 10:
-                self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+            if n <= 112:
+                if st == 1:
+                    y = y - 61
+                    xi = xi * -1
+                    st = 0
 
-            self.labels[f"{self.att.users[n]}"].setAlignment(QtCore.Qt.AlignCenter)
-            self.labels[f"{self.att.users[n]}"].setObjectName("label")
-            self.labels[f"{self.att.users[n]}"].setText(_translate("Form", f"{self.att.users[n]}"))
-            self.labels[f"{self.att.users[n]}"].setFont(font)
-            self.labels[f"{self.att.users[n]}"].setAlignment(QtCore.Qt.AlignCenter)
-            self.frames[f"{self.att.users[n]}"].show()
-            
-            if n <= len(self.att.users)-3:
-                if self.att.users[n][2:4] != self.att.users[n+1][2:4]:
-                    x = 1
-                    y = y + 1
+                elif n % 8 == 0:
+                    st = 1
+                    x = x + xi * 65
                 else:
-                    x = x + 1
+                    x = x + xi * 65
+            elif n > 112 and n <= 124:
+                if st == 1:
+                    y = y - 61
+                    xi = xi * -1
+                    st = 0
 
-            elif n == len(self.att.users)-2:
-                x = x + 1
+                elif (n-112) % 6 == 0:
+                    st = 1
+                    x = x + xi * 65
+                else:
+                    x = x + xi * 65
             
-            elif n == len(self.att.users)-1:
+            else:
+                if n == 125:
+                    x = 666
+                    y = 925
+                    xi = 1
+                    st = 0
+
+                if st == 1:
+                    y = y - 61
+                    xi = xi * -1
+                    st = 0
+
+                elif (n-124) % 9 == 0:
+                    st = 1
+                    x = x + xi * 65
+                else:
+                    x = x + xi * 65
+           
+
+            self.frames[f"{n}"] = QtWidgets.QFrame(Form)
+            self.frames[f"{n}"].setGeometry(QtCore.QRect(x, y, 61 , 46))
+            self.frames[f"{n}"].setFrameShape(QtWidgets.QFrame.Box) 
+            self.frames[f"{n}"].setFrameShadow(QtWidgets.QFrame.Plain)
+            self.frames[f"{n}"].setLineWidth(2)
+            self.frames[f"{n}"].setObjectName("frame")
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800") #green
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c") #gray
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d") #yellow
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#323232") #black-gray
+            self.labels[f"{n}"] = QtWidgets.QLabel(self.frames[f"{n}"])
+            self.labels[f"{n}"].setGeometry(QtCore.QRect(2, 2, 57, 42))
+            self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#323232") 
+            # if self.att.data[f"{n}"]["check_time"] == None:
+            #     self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+            # elif self.att.data[n]["second_day"] != ['None'] and len(str(self.att.data[n]["check_time"])) <= 10:
+            #     self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+            # elif self.att.data[n]["second_day"] == ['None'] and len(str(self.att.data[n]["check_time"])) <= 10:
+            #     self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+            # elif self.att.data[n]["second_day"] != ['None'] and len(str(self.att.data[n]["check_time"])) > 10:
+            #     self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+
+            self.labels[f"{n}"].setAlignment(QtCore.Qt.AlignCenter)
+            self.labels[f"{n}"].setObjectName("label")
+            self.labels[f"{n}"].setText(_translate("Form", ""))
+            self.labels[f"{n}"].setFont(font)
+            self.labels[f"{n}"].setAlignment(QtCore.Qt.AlignCenter)
+            self.frames[f"{n}"].show()
+            
+            print(f"n : {n} {x},{y},{61},{46}")
+
+            if n == 268:
                 break
-            
+
             n = n + 1
+
+    def mapping(self):
+        # f"{self.att.data[self.att.users[n]]['pos']}"
+        _translate = QtCore.QCoreApplication.translate
+        for us in self.att.users:
+            self.labels[f"{self.att.data[us]['pos']}"].setText(_translate("Form", f"{us}"))
+            
+            if self.att.data[us]["check_time"] == None:
+                self.labels[f"{self.att.data[us]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+            elif self.att.data[us]["second_day"] != ['None'] and len(str(self.att.data[us]["check_time"])) <= 10:
+                self.labels[f"{self.att.data[us]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+            elif self.att.data[us]["second_day"] == ['None'] and len(str(self.att.data[us]["check_time"])) <= 10:
+                self.labels[f"{self.att.data[us]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+            elif self.att.data[us]["second_day"] != ['None'] and len(str(self.att.data[us]["check_time"])) > 10:
+                self.labels[f"{self.att.data[us]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+
+            
+
+
+
+            
             
 
 
