@@ -1,54 +1,119 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from datetime import datetime
 from main import attendance
+from barcode import cam
+import pynput
+import time
+
+# class switchingThread(QThread):
+#     # Create a counter thread
+#     change_value = pyqtSignal(bool)
+#     def run(self):
+#         self.change_value.emit(True)
+
 
 class Ui_Form(object):
     def __init__(self):
         self.att = attendance()
         self.frames = dict()
         self.labels = dict()
-    
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1720, 980)
-        self.save_brt = QtWidgets.QPushButton(Form)
-        self.save_brt.setGeometry(QtCore.QRect(1560, 10, 91, 41))
-        
+        font = QtGui.QFont()
+        font.setFamily("휴먼매직체")
+        font.setPointSize(16)
+        Form.setFont(font)
+        self.attend_brt = QtWidgets.QPushButton(Form)
+        self.attend_brt.setGeometry(QtCore.QRect(1560, 10, 91, 41))
         font = QtGui.QFont()
         font.setFamily("한컴산뜻돋움")
-        font.setPointSize(24)
+        font.setPointSize(20)
         font.setBold(False)
         font.setWeight(50)
-        self.save_brt.setFont(font)
-        self.save_brt.setObjectName("save_brt")
+        self.attend_brt.setFont(font)
+        self.attend_brt.setObjectName("attend_brt")
         self.input_user = QtWidgets.QLineEdit(Form)
-        self.input_user.setGeometry(QtCore.QRect(1350, 10, 201, 41))
+        self.input_user.setGeometry(QtCore.QRect(1360, 10, 191, 41))
         font = QtGui.QFont()
         font.setFamily("한컴산뜻돋움")
         font.setPointSize(20)
         self.input_user.setFont(font)
         self.input_user.setObjectName("input_user")
         self.label_txt = QtWidgets.QLabel(Form)
-        self.label_txt.setGeometry(QtCore.QRect(1350, 120, 301, 161))
+        self.label_txt.setGeometry(QtCore.QRect(1360, 160, 291, 161))
         font = QtGui.QFont()
         font.setFamily("한컴산뜻돋움")
         font.setPointSize(20)
         self.label_txt.setFont(font)
+        self.label_txt.setAlignment(QtCore.Qt.AlignCenter)
         self.label_txt.setObjectName("label_txt")
-        
+        self.switching_cam_brt = QtWidgets.QPushButton(Form)
+        self.switching_cam_brt.setGeometry(QtCore.QRect(1360, 60, 91, 41))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(20)
+        font.setBold(False)
+        font.setWeight(50)
+        self.switching_cam_brt.setFont(font)
+        self.switching_cam_brt.setObjectName("switching_cam_brt")
+        self.switching_num_brt = QtWidgets.QPushButton(Form)
+        self.switching_num_brt.setGeometry(QtCore.QRect(1460, 60, 91, 41))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(20)
+        font.setBold(False)
+        font.setWeight(50)
+        self.switching_num_brt.setFont(font)
+        self.switching_num_brt.setObjectName("switching_num_brt")
+        self.switching_num_brt.setDisabled(True)
+
+        self.save_brt = QtWidgets.QPushButton(Form)
+        self.save_brt.setGeometry(QtCore.QRect(1560, 60, 91, 41))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(20)
+        font.setBold(False)
+        font.setWeight(50)
+        self.save_brt.setFont(font)
+        self.save_brt.setObjectName("save_brt")
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
-        self.save_brt.clicked.connect(self.attend)
+        self.attend_brt.clicked.connect(self.attend)
+        self.save_brt.clicked.connect(self.att.save)
+        self.switching_cam_brt.clicked.connect(self.switching_cam)
         self.setup_pos()
         self.mapping()
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.save_brt.setText(_translate("Form", "출석"))
-        self.label_txt.setText(_translate("Form", "TextLabel"))
+        self.attend_brt.setText(_translate("Form", "출석"))
+        self.label_txt.setText(_translate("Form", ""))
+        self.switching_cam_brt.setText(_translate("Form", "학생증"))
+        self.switching_num_brt.setText(_translate("Form", "학번"))
+        self.save_brt.setText(_translate("Form", "저장"))
+    
+    def switching_cam(self):
+        _translate = QtCore.QCoreApplication.translate
+        self.label_txt.setText(_translate("Form", "저장완료"))
+        self.switching_cam_brt.setDisabled(True)
+        self.switching_num_brt.setDisabled(False)
+        while True:
+            cam()
+        #     time.sleep(0.1) 
+            # if keyboard.is_pressed("q"):
+                # break
+        self.switching_cam_brt.setDisabled(False)
+        self.switching_num_brt.setDisabled(True)
+
+    def save_data(self):
+        _translate = QtCore.QCoreApplication.translate
+        self.att.save()
+        self.label_txt.setText(_translate("Form", "저장완료"))
 
     def attend(self):
         _translate = QtCore.QCoreApplication.translate
@@ -195,14 +260,6 @@ class Ui_Form(object):
                 self.labels[f"{self.att.data[us]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
             elif self.att.data[us]["second_day"] != ['None'] and len(str(self.att.data[us]["check_time"])) > 10:
                 self.labels[f"{self.att.data[us]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-
-            
-
-
-
-            
-            
-
 
 if __name__ == "__main__":
     import sys
