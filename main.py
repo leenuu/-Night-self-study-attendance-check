@@ -35,7 +35,7 @@ class attendance:
 
         while True:
             if xlsx.cell(row=num, column=1).value != None:
-                data[str(xlsx.cell(row=num, column=1).value)] = {"last_date" : str(xlsx.cell(row=num, column=2).value).split(' ')[0], "count" : int(xlsx.cell(row=num, column=5).value), "first_day" : str(xlsx.cell(row=num, column=3).value).split(','),"second_day" : (lambda text: None if text == None else str(xlsx.cell(row=num, column=4).value).split(','))(str(xlsx.cell(row=num, column=3).value)) , "check_time": None}
+                data[str(xlsx.cell(row=num, column=1).value)] = {"last_date" : str(xlsx.cell(row=num, column=2).value).split(' ')[0], "count" : int(xlsx.cell(row=num, column=5).value), "first_day" : str(xlsx.cell(row=num, column=3).value).split(','),"second_day" : (lambda text: None if text == None else str(xlsx.cell(row=num, column=4).value).split(','))(str(xlsx.cell(row=num, column=3).value)) , "check_time": None, "pos":str(xlsx.cell(row=num, column=6).value)}
             elif xlsx.cell(row=num, column=1).value == None:
                 break
             num = num + 1
