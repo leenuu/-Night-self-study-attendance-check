@@ -201,10 +201,9 @@ class attendance:
                 pass
     
 
-at = attendance()
+# at = attendance()
 # print(at.data["031401-강일우"])
 
 # at.run()
 # at.schedule_init()
 # at.schedule_edit()
-
