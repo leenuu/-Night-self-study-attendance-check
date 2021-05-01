@@ -97,11 +97,12 @@ class Ui_Form(object):
         font.setFamily("한컴산뜻돋움")
         font.setPointSize(12)
         font.setBold(True)
+        print(len(self.att.users))
         n= 0
         while True:
             print(self.att.users[n])
             self.frames[f"{self.att.users[n]}"] = QtWidgets.QFrame(Form)
-            self.frames[f"{self.att.users[n]}"].setGeometry(QtCore.QRect(81 + (x - 1) * 61, 10 + (y - 1) * 61, 56 , 46))
+            self.frames[f"{self.att.users[n]}"].setGeometry(QtCore.QRect(81 + (x - 1) * 65, 10 + (y - 1) * 61, 61 , 46))
             self.frames[f"{self.att.users[n]}"].setFrameShape(QtWidgets.QFrame.Box) 
             self.frames[f"{self.att.users[n]}"].setFrameShadow(QtWidgets.QFrame.Plain)
             self.frames[f"{self.att.users[n]}"].setLineWidth(2)
@@ -110,7 +111,7 @@ class Ui_Form(object):
             # self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c") #gray
             # self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d") #yellow
             self.labels[f"{self.att.users[n]}"] = QtWidgets.QLabel(self.frames[f"{self.att.users[n]}"])
-            self.labels[f"{self.att.users[n]}"].setGeometry(QtCore.QRect(2, 2, 52, 42))
+            self.labels[f"{self.att.users[n]}"].setGeometry(QtCore.QRect(2, 2, 57, 42))
             if self.att.data[f"{self.att.users[n]}"]["check_time"] == None:
                 self.labels[f"{self.att.users[n]}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
             elif self.att.data[self.att.users[n]]["second_day"] != ['None'] and len(str(self.att.data[self.att.users[n]]["check_time"])) <= 10:
@@ -126,23 +127,21 @@ class Ui_Form(object):
             self.labels[f"{self.att.users[n]}"].setFont(font)
             self.labels[f"{self.att.users[n]}"].setAlignment(QtCore.Qt.AlignCenter)
             self.frames[f"{self.att.users[n]}"].show()
-
-            n = n + 1
             
-            
-            if n != len(self.att.users)-2:
-                if self.att.users[n] != self.att.users[n+1]:
+            if n <= len(self.att.users)-3:
+                if self.att.users[n][2:4] != self.att.users[n+1][2:4]:
                     x = 1
                     y = y + 1
                 else:
                     x = x + 1
 
-            elif n == len(self.att.users)-1:
+            elif n == len(self.att.users)-2:
                 x = x + 1
             
-            elif n == len(self.att.users):
+            elif n == len(self.att.users)-1:
                 break
             
+            n = n + 1
             
 
 
