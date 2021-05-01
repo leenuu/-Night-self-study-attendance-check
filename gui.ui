@@ -6,17 +6,23 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1361</width>
-    <height>679</height>
+    <width>1720</width>
+    <height>980</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>휴먼매직체</family>
+    <pointsize>16</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="save_brt">
+  <widget class="QPushButton" name="attend_brt">
    <property name="geometry">
     <rect>
-     <x>1260</x>
+     <x>1560</x>
      <y>10</y>
      <width>91</width>
      <height>41</height>
@@ -24,8 +30,8 @@
    </property>
    <property name="font">
     <font>
-     <family>휴먼매직체</family>
-     <pointsize>24</pointsize>
+     <family>한컴산뜻돋움</family>
+     <pointsize>20</pointsize>
      <weight>50</weight>
      <bold>false</bold>
     </font>
@@ -37,15 +43,15 @@
   <widget class="QLineEdit" name="input_user">
    <property name="geometry">
     <rect>
-     <x>1050</x>
+     <x>1360</x>
      <y>10</y>
-     <width>201</width>
+     <width>191</width>
      <height>41</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>휴먼매직체</family>
+     <family>한컴산뜻돋움</family>
      <pointsize>20</pointsize>
     </font>
    </property>
@@ -53,39 +59,86 @@
   <widget class="QLabel" name="label_txt">
    <property name="geometry">
     <rect>
-     <x>1050</x>
-     <y>120</y>
-     <width>301</width>
+     <x>1360</x>
+     <y>160</y>
+     <width>291</width>
      <height>161</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>휴먼매직체</family>
+     <family>한컴산뜻돋움</family>
      <pointsize>20</pointsize>
     </font>
    </property>
    <property name="text">
     <string>TextLabel</string>
    </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
   </widget>
-  <widget class="QFrame" name="frame">
+  <widget class="QPushButton" name="switching_cam_brt">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>31</width>
-     <height>31</height>
+     <x>1360</x>
+     <y>60</y>
+     <width>91</width>
+     <height>41</height>
     </rect>
    </property>
-   <property name="frameShape">
-    <enum>QFrame::Box</enum>
+   <property name="font">
+    <font>
+     <family>한컴산뜻돋움</family>
+     <pointsize>20</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
    </property>
-   <property name="frameShadow">
-    <enum>QFrame::Plain</enum>
+   <property name="text">
+    <string>학생증</string>
    </property>
-   <property name="lineWidth">
-    <number>5</number>
+  </widget>
+  <widget class="QPushButton" name="switching_num_brt">
+   <property name="geometry">
+    <rect>
+     <x>1460</x>
+     <y>60</y>
+     <width>91</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>한컴산뜻돋움</family>
+     <pointsize>20</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>학번</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="save_brt">
+   <property name="geometry">
+    <rect>
+     <x>1560</x>
+     <y>60</y>
+     <width>91</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>한컴산뜻돋움</family>
+     <pointsize>20</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>저장</string>
    </property>
   </widget>
  </widget>
