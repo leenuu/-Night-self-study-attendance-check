@@ -16,7 +16,7 @@ class camThread(QtCore.QThread):
         
         self.main = parent
         self.isRun = False
-        self.capture = cv2.VideoCapture(1)
+        self.capture = cv2.VideoCapture(0)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
