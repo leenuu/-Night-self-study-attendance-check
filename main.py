@@ -16,7 +16,7 @@ class attendance:
 
     def user_names(self):
         users = list()
-        num = 1
+        num = 2
         files = openpyxl.load_workbook('data.xlsx')
         xlsx = files.active
         while True:
@@ -29,7 +29,7 @@ class attendance:
 
     def load(self):
         data = dict()
-        num = 1
+        num = 2
         files = openpyxl.load_workbook('data.xlsx')
         xlsx = files.active
 
@@ -50,12 +50,12 @@ class attendance:
         files2 = openpyxl.load_workbook('schedule.xlsx', read_only=False, data_only=True)
         ws = files2.active
 
-        num = 1
+        num = 2
         while True:
             if ds.cell(row=num, column=1).value != None:
                 ds.cell(row=num, column=2).value = self.data[ds.cell(row=num, column=1).value]["last_date"]
                 ds.cell(row=num, column=5).value = self.data[ds.cell(row=num, column=1).value]["count"]    
-                ws.cell(row=num+1,column=2).value = self.data[ds.cell(row=num, column=1).value]["count"]   
+                ws.cell(row=num,column=2).value = self.data[ds.cell(row=num, column=1).value]["count"]   
                 
             elif ds.cell(row=num, column=1).value == None:
                 break
@@ -76,11 +76,11 @@ class attendance:
         ws.cell(row=1, column=2).value = "출석 수"
 
         while True:
-            if ds.cell(row=num-1, column=1).value != None:
-                ws.cell(row=num, column=1).value = str(ds.cell(row=num-1, column=1).value)
-                ws.cell(row=num, column=2).value = self.data[str(ds.cell(row=num-1, column=1).value)]["count"]    
+            if ds.cell(row=num, column=1).value != None:
+                ws.cell(row=num, column=1).value = str(ds.cell(row=num, column=1).value)
+                ws.cell(row=num, column=2).value = self.data[str(ds.cell(row=num, column=1).value)]["count"]    
                 
-            elif ds.cell(row=num-1, column=1).value == None:
+            elif ds.cell(row=num, column=1).value == None:
                 break
             num = num + 1
         
@@ -128,6 +128,7 @@ class attendance:
                 else:
                     ds.cell(row=user_num, column=self.col_date).value = str(ds.cell(row=user_num, column=self.col_date).value) + str(self.data[str(user)]["check_time"]) + "/"
                 ds.cell(row=user_num, column=2).value = self.data[str(user)]["count"]    
+                print(user_num)
                 break
             user_num = user_num + 1
         files.save("schedule.xlsx")
