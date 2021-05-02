@@ -28,9 +28,9 @@ class camThread(QtCore.QThread):
             if cv2.waitKey(1) == 27:
                 pass
             if keyboard.is_pressed('esc'):
-                self.user.emit("0")
                 self.capture.release()
                 self.isRun = False
+                self.user.emit("0")
                 return
             elif keyboard.is_pressed('enter'):
                 try:
