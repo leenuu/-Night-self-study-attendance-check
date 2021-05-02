@@ -1,22 +1,61 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from datetime import datetime
 from main import attendance
-from barcode import cam
-import pynput
+# from barcode_reader import cam
 import time
+import  keyboard
+import pyzbar.pyzbar as pyzbar 
+import numpy as np 
+import cv2
 
-# class switchingThread(QThread):
-#     # Create a counter thread
-#     change_value = pyqtSignal(bool)
-#     def run(self):
-#         self.change_value.emit(True)
+class camThread(QtCore.QThread):
+    user = QtCore.pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super().__init__()
+        
+        self.main = parent
+        self.isRun = False
+        self.capture = cv2.VideoCapture(1)
+        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+
+    def run(self):
+        while self.isRun:
+            ret, frame = self.capture.read()
+            cv2.imshow("VideoFrame", frame)
+            if cv2.waitKey(1) == 27:
+                pass
+            if keyboard.is_pressed('esc'):
+                self.user.emit("0")
+                self.capture.release()
+                self.isRun = False
+                return
+            elif keyboard.is_pressed('enter'):
+                try:
+                    cv2.imwrite('barcode.png',frame, params=[cv2.IMWRITE_JPEG_QUALITY,0])
+                    im = cv2.imread('barcode.png') 
+                    decodedObjects = self.decode(im)
+                    data = str(int(decodedObjects[0].data))
+                    self.user.emit(data)
+                except IndexError:
+                    self.user.emit("1")
+
+    def decode(self,im):
+        decodedObjects = pyzbar.decode(im) 
+        return decodedObjects
 
 
 class Ui_Form(object):
     def __init__(self):
         self.att = attendance()
+        self.cam_data = camThread(self)
+        self.cam_data.user.connect(self.use_cam)
+        self.attend_user_names = list()
         self.frames = dict()
         self.labels = dict()
+        self.set_name_data()
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -83,8 +122,9 @@ class Ui_Form(object):
         QtCore.QMetaObject.connectSlotsByName(Form)
 
         self.attend_brt.clicked.connect(self.attend)
-        self.save_brt.clicked.connect(self.att.save)
+        self.save_brt.clicked.connect(self.save_data)
         self.switching_cam_brt.clicked.connect(self.switching_cam)
+        self.switching_num_brt.clicked.connect(self.switching_num)
         self.setup_pos()
         self.mapping()
 
@@ -97,18 +137,33 @@ class Ui_Form(object):
         self.switching_num_brt.setText(_translate("Form", "학번"))
         self.save_brt.setText(_translate("Form", "저장"))
     
+    def set_name_data(self):
+        for us in self.att.users:
+            if self.att.day[datetime.today().weekday()] in self.att.data[us]["first_day"]:
+                print(us)
+                self.attend_user_names.append(us)
+
+
     def switching_cam(self):
         _translate = QtCore.QCoreApplication.translate
-        self.label_txt.setText(_translate("Form", "저장완료"))
+        self.label_txt.setText(_translate("Form", "학생증"))
         self.switching_cam_brt.setDisabled(True)
         self.switching_num_brt.setDisabled(False)
-        while True:
-            cam()
-        #     time.sleep(0.1) 
-            # if keyboard.is_pressed("q"):
-                # break
-        self.switching_cam_brt.setDisabled(False)
-        self.switching_num_brt.setDisabled(True)
+        self.cam_data.isRun = True
+        self.cam_data.start()
+        
+    def use_cam(self, user):
+        if self.cam_data.isRun == False:
+            self.switching_cam_brt.setDisabled(False)
+            self.switching_num_brt.setDisabled(True)
+        print(user)
+    
+    def switching_num(self):
+        pass
+        # _translate = QtCore.QCoreApplication.translate
+        # self.label_txt.setText(_translate("Form", "학번"))
+        # self.switching_cam_brt.setDisabled(False)
+        # self.switching_num_brt.setDisabled(True)
 
     def save_data(self):
         _translate = QtCore.QCoreApplication.translate
@@ -120,33 +175,37 @@ class Ui_Form(object):
         user = str(self.input_user.text())
         print(user)
         try:
-            if str(datetime.today().strftime("%Y-%m-%d")) != self.att.data[user]["last_date"] and self.att.data[user]["check_time"] == None:
-                self.att.data[user]["last_date"] = str(datetime.today().strftime("%Y-%m-%d"))
-                self.att.data[user]["check_time"] = str(datetime.today().strftime("%H:%M:%S")) 
-                self.att.data[user]["count"] = self.att.data[user]["count"] + 1
-                self.att.schedule_check(user)
-                self.label_txt.setText(_translate("Form","출석완료."))
-                if self.att.data[user]["second_day"] != ['None'] and len(str(self.att.data[user]["check_time"])) <= 10:
-                    self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
-                elif self.att.data[user]["second_day"] == ['None']:
+            if user in self.attend_user_names:
+                if str(datetime.today().strftime("%Y-%m-%d")) != self.att.data[user]["last_date"] and self.att.data[user]["check_time"] == None:
+                    self.att.data[user]["last_date"] = str(datetime.today().strftime("%Y-%m-%d"))
+                    self.att.data[user]["check_time"] = str(datetime.today().strftime("%H:%M:%S")) 
+                    self.att.data[user]["count"] = self.att.data[user]["count"] + 1
+                    self.att.schedule_check(user)
+                    self.label_txt.setText(_translate("Form","출석완료."))
+                    if self.att.data[user]["second_day"] != ['None'] and len(str(self.att.data[user]["check_time"])) <= 10:
+                        self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                    elif self.att.data[user]["second_day"] == ['None']:
+                        self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+
+                    print("출석완료.")
+                    print('\n',end='')
+
+                elif self.att.check_time(self.att.data[user]["check_time"]):
+                    self.att.data[user]["check_time"] = self.att.data[user]["check_time"] + str(datetime.today().strftime("%H:%M:%S"))
+                    self.att.schedule_check(user)
                     self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-
-                print("출석완료.")
+                    self.label_txt.setText(_translate("Form","출석완료."))
+                    print("출석완료.")
+                    print('\n',end='')
+                
+                elif str(datetime.today().strftime("%Y-%m-%d")) == self.att.data[user]["last_date"] and self.att.check_time(self.att.data[user]["check_time"]) == False:
+                    self.label_txt.setText(_translate("Form","이미 출석 하셨습니다."))
+                    print("이미 춣석 하셨습니다.")
+                    print('\n',end='')
+            else:
+                self.label_txt.setText(_translate("Form","오늘 야자 학생이 \n아닙니다."))
+                print("오늘 야자 학생이 아닙니다.")
                 print('\n',end='')
-
-            elif self.att.check_time(self.att.data[user]["check_time"]):
-                self.att.data[user]["check_time"] = self.att.data[user]["check_time"] + str(datetime.today().strftime("%H:%M:%S"))
-                self.att.schedule_check(user)
-                self.labels[f"{self.att.data[user]['pos']}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-                self.label_txt.setText(_translate("Form","출석완료."))
-                print("출석완료.")
-                print('\n',end='')
-            
-            elif str(datetime.today().strftime("%Y-%m-%d")) == self.att.data[user]["last_date"] and self.att.check_time(self.att.data[user]["check_time"]) == False:
-                self.label_txt.setText(_translate("Form","이미 출석 하셨습니다."))
-                print("이미 춣석 하셨습니다.")
-                print('\n',end='')
-            
 
         except KeyError:
             print("keyError")
@@ -249,7 +308,7 @@ class Ui_Form(object):
     def mapping(self):
         # f"{self.att.data[self.att.users[n]]['pos']}"
         _translate = QtCore.QCoreApplication.translate
-        for us in self.att.users:
+        for us in self.attend_user_names:
             self.labels[f"{self.att.data[us]['pos']}"].setText(_translate("Form", f"{us}"))
             
             if self.att.data[us]["check_time"] == None:
