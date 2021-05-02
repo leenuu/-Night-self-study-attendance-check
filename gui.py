@@ -149,6 +149,7 @@ class Ui_Form(object):
         self.label_txt.setText(_translate("Form", "학생증"))
         self.switching_cam_brt.setDisabled(True)
         self.switching_num_brt.setDisabled(False)
+        self.attend_brt.setDisabled(True)
         self.cam_data.isRun = True
         self.cam_data.start()
         
@@ -156,6 +157,7 @@ class Ui_Form(object):
         if self.cam_data.isRun == False:
             self.switching_cam_brt.setDisabled(False)
             self.switching_num_brt.setDisabled(True)
+            self.attend_brt.setDisabled(False)
         print(user)
     
     def switching_num(self):
