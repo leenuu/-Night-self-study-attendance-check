@@ -1,6 +1,7 @@
 import pyzbar.pyzbar as pyzbar 
-import numpy as np 
+import numpy as np
 import cv2
+from test import *
 def cam():
     capture = cv2.VideoCapture(1)
     capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
@@ -17,12 +18,14 @@ def cam():
     cv2.destroyAllWindows()
     #test.predict()
 
+
 def decode(im):
     decodedObjects = pyzbar.decode(im) 
         
-    for obj in decodedObjects: 
-        print('Type : ', obj.type) 
-        print('Data : ', int(obj.data)) 
+    #for obj in decodedObjects: 
+        #print('Type : ', obj.type) 
+        #print('Data : ', obj.data, '\n')
+        #print(int(obj.data))
         
     return decodedObjects
 
@@ -46,10 +49,11 @@ def display(im, decodedObjects):
         #cv2_imshow(im)
         #cv2.waitKey(0)
         
-if __name__ == '__main__': 
-    cam()
+if __name__ == '__main__':
+    #cam()
     im = cv2.imread('barcode.png') 
     #im = cv2.imread('barcode.jpg', cv2.IMREAD_UNCHANGED)
             
     decodedObjects = decode(im)
-    display(im, decodedObjects)
+    print(str(int(decodedObjects[0].data)))
+    #display(im, decodedObjects)
