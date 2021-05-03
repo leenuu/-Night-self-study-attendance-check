@@ -1,12 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from datetime import datetime
 from main_for_t import attendance
-# from barcode_reader import cam
 import time
-import  keyboard
-import pyzbar.pyzbar as pyzbar 
-import numpy as np 
-import cv2
 
 class Ui_Form(object):
     def __init__(self):
@@ -227,9 +222,9 @@ class Ui_Form(object):
 
     def re_mapping(self):
         for us in self.change_user:
-            self.brts[f"{self.att.data[us]['pos']}"][0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-            self.brts[f"{self.att.data[us]['pos']}"][1] = 2
-            self.brts[f"{self.att.data[us]['pos']}"][0].setDisabled(True)
+            if self.brts[f"{self.att.data[us]['pos']}"][1] == 2:
+                self.brts[f"{self.att.data[us]['pos']}"][0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                self.brts[f"{self.att.data[us]['pos']}"][0].setDisabled(True)
         
         self.change_user = []
 
