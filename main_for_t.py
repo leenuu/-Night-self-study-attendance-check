@@ -1,9 +1,12 @@
 from datetime import datetime
 import openpyxl
+import os
 
 class attendance:
     def __init__(self):
         self.day = ['월', '화', '수', '목', '금', '토', '일']
+        self.path_data = os.path.join(os.getcwd(), 'data.xlsx')
+        self.path_schedule = os.path.join(os.getcwd(), 'schedule.xlsx') 
         self.col_date = 0
         self.data = self.load()
         self.users = self.user_names()
@@ -17,7 +20,7 @@ class attendance:
     def user_names(self):
         users = list()
         num = 2
-        files = openpyxl.load_workbook('data.xlsx')
+        files = openpyxl.load_workbook(self.path_data)
         xlsx = files.active
         while True:
             if xlsx.cell(row=num, column=1).value != None:
@@ -30,7 +33,7 @@ class attendance:
     def load(self):
         data = dict()
         num = 2
-        files = openpyxl.load_workbook('data.xlsx')
+        files = openpyxl.load_workbook(self.path_data)
         xlsx = files.active
 
         while True:
@@ -44,10 +47,10 @@ class attendance:
         return data
 
     def save(self):
-        files1 = openpyxl.load_workbook('data.xlsx')
+        files1 = openpyxl.load_workbook(self.path_data)
         ds = files1.active
 
-        files2 = openpyxl.load_workbook('schedule.xlsx', read_only=False, data_only=True)
+        files2 = openpyxl.load_workbook(self.path_schedule, read_only=False, data_only=True)
         ws = files2.active
 
         num = 2
@@ -61,11 +64,11 @@ class attendance:
                 break
             num = num + 1
         
-        files1.save("data.xlsx")
-        files2.save('schedule.xlsx')
+        files1.save(self.path_data)
+        files2.save(self.path_schedule)
 
     def schedule_init(self):
-        files = openpyxl.load_workbook('data.xlsx')
+        files = openpyxl.load_workbook(self.path_data)
         ds = files.active
 
         wb = openpyxl.Workbook()
@@ -84,11 +87,11 @@ class attendance:
                 break
             num = num + 1
         
-        wb.save("schedule.xlsx")
+        wb.save(self.path_schedule)
 
 
     def schedule_check_init(self):
-        files = openpyxl.load_workbook('schedule.xlsx', read_only=False, data_only=True)
+        files = openpyxl.load_workbook(self.path_schedule, read_only=False, data_only=True)
         ds = files.active
 
         self.col_date = 3
@@ -114,10 +117,10 @@ class attendance:
             
             self.col_date = self.col_date + 1
                 
-        files.save("schedule.xlsx")
+        files.save(self.path_schedule)
 
     def schedule_check(self, user):
-        files = openpyxl.load_workbook('schedule.xlsx', read_only=False, data_only=True)
+        files = openpyxl.load_workbook(self.path_schedule, read_only=False, data_only=True)
         ds = files.active
 
         user_num = 2
@@ -128,7 +131,7 @@ class attendance:
                 print(user_num)
                 break
             user_num = user_num + 1
-        files.save("schedule.xlsx")
+        files.save(self.path_schedule)
     
 
 # at = attendance()
