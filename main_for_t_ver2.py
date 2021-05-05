@@ -5,19 +5,30 @@ import os
 class attendance:
     def __init__(self):
         self.day = ['월', '화', '수', '목', '금', '토', '일']
+        self.path_serv_data = os.path.join(os.getcwd(), 'serv.xlsx')
         self.path_data = os.path.join(os.getcwd(), 'data.xlsx')
         self.path_schedule = os.path.join(os.getcwd(), 'schedule.xlsx') 
-        self.col_data = 0
+        self.col_num_data = 0
+        self.serv_col_num_data = 0
         self.user_names = list()
         self.data = self.data_load()
         
-        self.schedule_init()
-        # try:
-        #     self.schedule_check_init()
+        try:
+            self.schedule_check_init()
+            
 
-        # except FileNotFoundError:
-        #     self.schedule_init()
-        #     self.schedule_check_init()
+        except FileNotFoundError:
+            self.schedule_init()
+            
+            self.schedule_check_init()
+
+        try:
+            self.serv_data = self.serv_data_load()
+
+        except FileNotFoundError:
+            self.serv_data_init()
+            self.serv_data = self.serv_data_load()
+
 
     def data_load(self):
         data = dict()
@@ -47,7 +58,49 @@ class attendance:
         
         return data
 
-    def data_save(self):
+    def serv_data_init(self):   
+        serv_data_files = openpyxl.Workbook()
+        sdf = serv_data_files.active
+        sdf.cell(row=1, column=1).value = "이름"
+        sdf.cell(row=1, column=2).value = str(datetime.today().strftime("%Y-%m-%d"))
+
+        for user in self.user_names:
+            row = self.data[user]["id"] + 2
+            sdf.cell(row=row, column=1).value = user
+            sdf.cell(row=row, column=2).value = 0
+            sdf.cell(row=row, column=3).value = 0
+
+        serv_data_files.save(self.path_serv_data)
+
+    def serv_data_load(self):
+        serv_data_files = openpyxl.load_workbook(self.path_serv_data, read_only=False, data_only=True)
+        sdf = serv_data_files.active
+        serv_data = dict()
+
+        self.serv_col_num_data = 2
+        while True:
+            date = sdf.cell(row=1, column=self.serv_col_num_data).value
+            if date == None and date != str(datetime.today().strftime("%Y-%m-%d")):
+                sdf.cell(row=1, column=self.serv_col_num_data).value = str(datetime.today().strftime("%Y-%m-%d")) + f" {self.day[datetime.today().weekday()]}"
+                break
+            self.serv_col_num_data = self.serv_col_num_data + 2
+
+        row = 2
+        while True:
+            if sdf.cell(row=row, column=1).value != None:
+                sdf.cell(row=row, column=self.col_num_data).value = 0
+                sdf.cell(row=row, column=self.col_num_data + 1).value = 0
+                serv_data[us]["early_leave"] = sdf.cell(row=row, column=self.serv_col_num_data).value 
+                serv_data[us]["late"] = sdf.cell(row=row, column=self.serv_col_num_data + 1).value 
+            else:
+                break
+            row = row + 1
+                
+        serv_data_files.save(self.path_serv_data)
+
+        return serv_data
+
+    def schedule_save(self):
         pass
 
     def schedule_init(self):
@@ -77,14 +130,54 @@ class attendance:
         schedule_files.save(self.path_schedule)
 
     def schedule_check_init(self):
-        pass
+        schedule_files = openpyxl.load_workbook(self.path_schedule, read_only=False, data_only=True)
+        sf = schedule_files.active
 
-    def schedule_check(self, users):
-        pass
-    
+        self.col_num_data = 7
+        while True:
+            date = sf.cell(row=1, column=self.col_num_data).value
+            if date == None and date != str(datetime.today().strftime("%Y-%m-%d")):
+                sf.cell(row=1, column=self.col_num_data).value = str(datetime.today().strftime("%Y-%m-%d")) + f" {self.day[datetime.today().weekday()]}"
+                break
+            self.col_num_data = self.col_num_data + 1
+        
+        
+        row = 2
+        while True:
+            if sf.cell(row=row, column=self.col_num_data).value != None:
+                self.data[str(sf.cell(row=row, column=1).value)]["check_time"] = sf.cell(row=row, column=self.col_num_data).value
+            else:
+                break
+            row = row + 1
+
+        schedule_files.save(self.path_schedule)
+
+    def schedule_check(self, user, time, state):
+        
+        if state == 1:
+            check_time = self.data[user]["check_time"]
+            second_day = self.data[user]["second_day"]
+            if check_time == None:
+                self.data[user]["attend_count"] = self.data[user]["attend_count"] + 1
+                self.data[user]["check_time"] = time
+
+            elif check_time != None:
+                self.data[user]["check_time"] = self.data[user]["check_time"] + '/' + time
+        elif state == 2:
+            pass
+
+        elif state == 3:
+            pass
+
+        elif state == 4:
+            pass
+
+        elif state == 5:
+            pass
+
     def sum_absent_count(self, absent_count, late_count, early_leave_count):
         sum_absent = absent_count + (late_count + early_leave_count) // 3   
         return sum_absent
 
-att = attendance()
+# att = attendance()
 # print(att.data)
