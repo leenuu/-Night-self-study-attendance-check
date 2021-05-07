@@ -6,11 +6,13 @@ import time
 class Ui_Form(object):
     def __init__(self):
         self.att = attendance()
-        self.attend_user_names = self.get_att_users()
+        # self.attend_user_names = self.get_att_users()
+        self.log = self.att.log
         self.frames = dict()
         self.brts = dict()
+        self.attend_users = self.set_attend_users()
         self.change_user = list()
-        print(self.att.serv_data)
+        self.class_time = 1
 
 
     def setupUi(self, Form):
@@ -35,10 +37,67 @@ class Ui_Form(object):
         self.save_brt.setFont(font)
         self.save_brt.setObjectName("save_brt")
 
+        self.attend_absent = QtWidgets.QRadioButton(Form)
+        self.attend_absent.setGeometry(QtCore.QRect(1360, 400, 291, 30))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(20)
+        self.attend_absent.setFont(font)
+        self.attend_absent.setObjectName("attend_absent")
+
+        self.late_ealy = QtWidgets.QRadioButton(Form)
+        self.late_ealy.setGeometry(QtCore.QRect(1360, 450, 291, 30))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(20)
+        self.late_ealy.setFont(font)
+        self.late_ealy.setObjectName("late_ealy")
+
+        self.first_class = QtWidgets.QPushButton(Form)
+        self.first_class.setGeometry(QtCore.QRect(1360, 280, 291, 41))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(20)
+        font.setBold(False)
+        font.setWeight(50)
+        self.first_class.setFont(font)
+        self.first_class.setCheckable(False)
+        self.first_class.setAutoRepeat(False)
+        self.first_class.setAutoExclusive(False)
+        self.first_class.setAutoDefault(False)
+        self.first_class.setFlat(False)
+        self.first_class.setObjectName("first_class")
+
+        self.second_class = QtWidgets.QPushButton(Form)
+        self.second_class.setGeometry(QtCore.QRect(1360, 340, 291, 41))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(20)
+        font.setBold(False)
+        font.setWeight(50)
+        self.second_class.setFont(font)
+        self.second_class.setCheckable(False)
+        self.second_class.setAutoRepeat(False)
+        self.second_class.setAutoExclusive(False)
+        self.second_class.setAutoDefault(False)
+        self.second_class.setFlat(False)
+        self.second_class.setObjectName("second_class")
+
+        self.memo = QtWidgets.QPlainTextEdit(Form)
+        self.memo.setGeometry(QtCore.QRect(1360, 500, 291, 350))
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        self.memo.setFont(font)
+        self.memo.setObjectName("memo")
+
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
-        self.save_brt.clicked.connect(self.save_data)
+        self.first_class.setDisabled(True)
+        self.attend_absent.setChecked(True)
+        # self.save_brt.clicked.connect(self.save_data)
+        self.attend_absent.clicked.connect(self.class_time_radio)
+        self.late_ealy.clicked.connect(self.class_time_radio)
         self.setup_pos()
         self.mapping()
 
@@ -47,57 +106,197 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label_txt.setText(_translate("Form", ""))
         self.save_brt.setText(_translate("Form", "저장"))
+        self.attend_absent.setText(_translate("Form", "    출석   /   결석"))
+        self.late_ealy.setText(_translate("Form", "    지각   /   조퇴"))
+        self.first_class.setText(_translate("Form", "1 교시"))
+        self.second_class.setText(_translate("Form", "2 교시"))
+        self.memo.setPlainText(_translate("Form", self.log))
+    
+    def class_time_radio(self):
+        if self.attend_absent.isChecked():
+            print(1)
+            self.class_time = 1
+        elif self.late_ealy.isChecked():
+            print(2)
+            self.class_time = 2
 
-    def save_data(self):
-        pass
-
-    def get_att_users(self):
+    def set_attend_users(self):
         users = list()
-        for us in self.att.user_names:
-            day = self.att.day[datetime.today().weekday()]
-            user_day = self.att.data[us]["first_day"]
-            if day in user_day:
-                users.append(us)
-
+        for user in self.att.user_names:
+            if self.att.day[datetime.today().weekday()] in self.att.data[user]["first_day"]:
+                users.append(user)
         return users
 
     def change_brt_color(self, state, user):
-        brt = self.brts[f"{self.att.data[user]['pos']}"]
-        second_day = self.att.data[user]['second_day']
-
-        if brt[1] <= 1 and second_day != None:
-            brt[1] = brt[1] + 1
-        elif brt[1] == 0 and second_day == None:
-            brt[1] = 2
-        elif brt[1] == 2:
-            brt[1] = 3
-        elif brt[1] == 3:
-            brt[1] = 4
-        elif brt[1] == 4:
-            brt[1] = 5
-        elif brt[1] == 5:
-            brt[1] = 0
-
-        if brt[1] == 0: 
-            brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")        
-        elif brt[1] == 1: 
-            brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")        
-        elif brt[1] == 2: 
-            brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")    
-        elif brt[1] == 3:
-            brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#FA661D") 
-        elif brt[1] == 4:
-            brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#453CF3") 
-        elif brt[1] == 5:
-            brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#FC0000") 
-
-        self.brts[f"{self.att.data[user]['pos']}"][2] = str(datetime.today().strftime("%Y-%m-%d"))
-        if user not in self.change_user and self.brts[f"{self.att.data[user]['pos']}"][0] != 0:
-            self.change_user.append(user)
-        
-        if self.brts[f"{self.att.data[user]['pos']}"][1] == 0:
-            self.change_user.remove(user)
+        if self.class_time == 1:
+            brt = self.brts[f"{self.att.data[user]['pos']}"]
+            if brt[1] == 0:
+                brt[1] = 1
+                print(brt[1])
+                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+            elif brt[1] == 1:
+                brt[1] = 2
+                print(brt[1])
+                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#fc0000")
+            elif brt[1] == 2:
+                brt[1] = 0
+                print(brt[1])
+                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+            
                 
+        elif self.class_time == 2:
+            brt = self.brts[f"{self.att.data[user]['pos']}"]
+            if brt[1] == 0:
+                brt[1] = 3
+                print(brt[1])
+                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+            elif brt[1] == 3:
+                brt[1] = 4
+                print(brt[1])
+                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#fa661d")
+            elif brt[1] == 4:
+                brt[1] = 0
+                print(brt[1])
+                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+        if brt[0] != 0 and user not in self.change_user:
+            self.change_user.append(user)
+
+    def mapping(self):
+        _translate = QtCore.QCoreApplication.translate
+        if self.class_time == 1:
+            for us in self.attend_users:
+                brt = self.brts[f"{self.att.data[us]['pos']}"]
+                brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
+                brt[0].setDisabled(False)
+                brt[0].clicked.connect(lambda state, user=us: self.change_brt_color(state, user))
+                if self.att.data[us]['first_check_time'] == None:
+                    brt[1] = 0
+                elif self.att.data[us]['first_check_time'] == "결석":
+                    brt[1] = 2
+                elif "지각" in self.att.data[us]['first_check_time']:
+                    brt[1] = 4
+                elif self.att.data[us]['first_check_time'] == "조퇴":
+                    brt[1] = 4
+                else:
+                    brt[1] = 1
+
+                if brt[1] == 0:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+                elif brt[1] == 1:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                    brt[0].setDisabled(True)
+                elif brt[1] == 2:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "FC0000")
+                    brt[0].setDisabled(True)
+                elif brt[1] == 3:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                    brt[0].setDisabled(True)
+                elif brt[1] == 4:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#FA661D")
+                    brt[0].setDisabled(True)
+    
+        elif self.class_time == 2:
+            for us in self.attend_users:
+                if self.att.day[datetime.today().weekday()] in self.att.data[us]['second_day']:
+                    brt = self.brts[f"{self.att.data[us]['pos']}"]
+                    brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
+                    brt[0].setDisabled(False)
+                    brt[0].clicked.connect(lambda state, user=us: self.change_brt_color(state, user))
+                    if self.att.data[us]['second_check_time'] == None:
+                        brt[1] = 0
+                    elif self.att.data[us]['second_check_time'] == "결석":
+                        brt[1] = 2
+                    elif "지각" in self.att.data[us]['second_check_time']:
+                        brt[1] = 4
+                    elif self.att.data[us]['second_check_time'] == "조퇴":
+                        brt[1] = 4
+                    else:
+                        brt[1] = 1
+
+                    if brt[1] == 0:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+                    elif brt[1] == 1:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                        brt[0].setDisabled(True)
+                    elif brt[1] == 2:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "FC0000")
+                        brt[0].setDisabled(True)
+                    elif brt[1] == 3:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                        brt[0].setDisabled(True)
+                    elif brt[1] == 4:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#FA661D")
+                        brt[0].setDisabled(True)
+                
+    def re_mapping(self):
+        _translate = QtCore.QCoreApplication.translate
+        if self.class_time == 1:
+            for us in self.change_user:
+                brt = self.brts[f"{self.att.data[us]['pos']}"]
+                brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
+                brt[0].setDisabled(False)
+                brt[0].clicked.connect(lambda state, user=us: self.change_brt_color(state, user))
+                if self.att.data[us]['first_check_time'] == None:
+                    brt[1] = 0
+                elif self.att.data[us]['first_check_time'] == "결석":
+                    brt[1] = 2
+                elif "지각" in self.att.data[us]['first_check_time']:
+                    brt[1] = 4
+                elif self.att.data[us]['first_check_time'] == "조퇴":
+                    brt[1] = 4
+                else:
+                    brt[1] = 1
+
+                if brt[1] == 0:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+                elif brt[1] == 1:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                    brt[0].setDisabled(True)
+                elif brt[1] == 2:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "FC0000")
+                    brt[0].setDisabled(True)
+                elif brt[1] == 3:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                    brt[0].setDisabled(True)
+                elif brt[1] == 4:
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#FA661D")
+                    brt[0].setDisabled(True)
+    
+        elif self.class_time == 2:
+            for us in self.change_user:
+                if self.att.day[datetime.today().weekday()] in self.att.data[us]['second_day']:
+                    brt = self.brts[f"{self.att.data[us]['pos']}"]
+                    brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
+                    brt[0].setDisabled(False)
+                    brt[0].clicked.connect(lambda state, user=us: self.change_brt_color(state, user))
+                    if self.att.data[us]['second_check_time'] == None:
+                        brt[1] = 0
+                    elif self.att.data[us]['second_check_time'] == "결석":
+                        brt[1] = 2
+                    elif "지각" in self.att.data[us]['second_check_time']:
+                        brt[1] = 4
+                    elif self.att.data[us]['second_check_time'] == "조퇴":
+                        brt[1] = 4
+                    else:
+                        brt[1] = 1
+
+                    if brt[1] == 0:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+                    elif brt[1] == 1:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                        brt[0].setDisabled(True)
+                    elif brt[1] == 2:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "FC0000")
+                        brt[0].setDisabled(True)
+                    elif brt[1] == 3:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                        brt[0].setDisabled(True)
+                    elif brt[1] == 4:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#FA661D")
+                        brt[0].setDisabled(True)
+
+        self.change_user = []
+
     def setup_pos(self):
         x = 16
         xi = 1
@@ -159,13 +358,13 @@ class Ui_Form(object):
             # self.frames[f"{n}"].setFrameShadow(QtWidgets.QFrame.Plain)
             self.frames[f"{n}"].setLineWidth(2)
             self.frames[f"{n}"].setObjectName("frame")
-            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800") #green
-            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c") #gray
-            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d") #yellow
-            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#323232") #black-gray
-            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#FA661D") #orange
-            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#453CF3") #blue
-            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#FC0000") # red
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#02f800") #green 출석 1
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c") #gray 선택 X 0
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d") #yellow 지각 3
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#323232") #black-gray 자리 X
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#FA661D") #orange 조퇴 4
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#453CF3") #blue 
+            # self.labels[f"{n}"].setStyleSheet("QWidget { background-color: %s }" %  "#FC0000") # red 결석 2
             self.brts[f"{n}"] = list()
             self.brts[f"{n}"].append(QtWidgets.QPushButton(self.frames[f"{n}"]))
             self.brts[f"{n}"][0].setGeometry(QtCore.QRect(2, 2, 57, 42))
@@ -188,41 +387,6 @@ class Ui_Form(object):
                 break
 
             n = n + 1
-
-    def mapping(self):
-        # f"{self.att.data[self.att.users[n]]['pos']}"
-        _translate = QtCore.QCoreApplication.translate
-        for us in self.attend_user_names:
-            brt = self.brts[f"{self.att.data[us]['pos']}"]
-            second_day = self.att.data[us]["second_day"]
-            check_time = self.att.data[us]["check_time"]
-            last_date = self.att.data[us]["last_date"]
-
-            brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
-            brt[0].setDisabled(False)
-            brt[0].clicked.connect(lambda state, user=us: self.change_brt_color(state, user))
-            
-            brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
-            print(type(second_day))
-            if second_day != None and check_time != None and len(str(self.att.data[us]["check_time"])) <= 10:
-                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
-                brt[1] = 1
-            elif second_day == None and last_date == str(datetime.today().strftime("%Y-%m-%d")):
-                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-                brt[1] = 2
-                brt[0].setDisabled(True)
-            elif second_day != None and len(str(check_time)) > 10:
-                brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-                brt[1] = 2
-                brt[0].setDisabled(True)
-
-    def re_mapping(self):
-        for us in self.change_user:
-            if self.brts[f"{self.att.data[us]['pos']}"][1] == 2:
-                self.brts[f"{self.att.data[us]['pos']}"][0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-                self.brts[f"{self.att.data[us]['pos']}"][0].setDisabled(True)
-        
-        self.change_user = []
 
 if __name__ == "__main__":
     import sys
