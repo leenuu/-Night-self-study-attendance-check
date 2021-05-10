@@ -16,7 +16,7 @@ class attendance:
 
         try:
             self.schedule_set_data()
-            
+
         except FileNotFoundError:
             self.schedule_init()
             self.schedule_set_data()
@@ -44,21 +44,19 @@ class attendance:
         data = dict()
         row = 2
         data_files = openpyxl.load_workbook(self.path_data)
-        data_xlsx = data_files.active
+        data_xlsx = data_files.active      
 
         while True:
             if data_xlsx.cell(row=row, column=1).value != None:
                 user_id = row - 2
                 user = str(data_xlsx.cell(row=row, column=1).value)
-                last_date = str(data_xlsx.cell(row=row, column=2).value).split(' ')[0]
-                first_day = str(data_xlsx.cell(row=row, column=3).value).split(',')
-                second_day = (lambda day: None if day == None else str(day).split(','))(data_xlsx.cell(row=row, column=4).value)
-                attend_count = int(data_xlsx.cell(row=row, column=5).value)
-                early_leave_count = int(data_xlsx.cell(row=row, column=6).value)
-                late_count = int(data_xlsx.cell(row=row, column=7).value)
-                absent_count = int(data_xlsx.cell(row=row, column=8).value)
-                pos = int(data_xlsx.cell(row=row, column=9).value)
-                data[user] = {"id" : user_id, "last_date" : last_date, "first_day" : first_day, "second_day" : second_day, "attend_count" : attend_count, "early_leave_count" : early_leave_count, "late_count": late_count, "absent_count" : absent_count, "pos" : pos, "first_check_time": None , "second_check_time" : None}
+                first_day = str(data_xlsx.cell(row=row, column=2).value).split(',')
+                second_day = (lambda day: [] if day == None else str(day).split(','))(data_xlsx.cell(row=row, column=3).value)
+                early_leave_count = int(data_xlsx.cell(row=row, column=4).value)
+                late_count = int(data_xlsx.cell(row=row, column=5).value)
+                absent_count = int(data_xlsx.cell(row=row, column=6).value)
+                pos = int(data_xlsx.cell(row=row, column=7).value)
+                data[user] = {"id" : user_id, "first_day" : first_day, "second_day" : second_day, "early_leave_count" : early_leave_count, "late_count": late_count, "absent_count" : absent_count, "pos" : pos, "first_check_time": None , "second_check_time" : None}
                 
                 self.user_names.append(user)
                 row = row + 1
@@ -70,6 +68,21 @@ class attendance:
 
         return data
 
+    def save_data(self, users):
+        data_files = openpyxl.load_workbook(self.path_data)
+        data_xlsx = data_files.active
+        schedule_files = openpyxl.load_workbook(self.path_schedule)
+        sf = schedule_files['1교시']
+
+        for user in users:
+            row = self.data[user]["id"] + 2
+            data_xlsx.cell(row=row, column=4).value = sf.cell(row=row, column=3).value
+            data_xlsx.cell(row=row, column=5).value = sf.cell(row=row, column=4).value
+            data_xlsx.cell(row=row, column=6).value = sf.cell(row=row, column=5).value
+        
+        data_files.save(self.path_data)
+
+
     def schedule_init(self):
         data_files = openpyxl.load_workbook(self.path_data)
         df = data_files.active
@@ -79,36 +92,32 @@ class attendance:
         sf_c2 = schedule_files.create_sheet()
         sf_c1.title = "1교시"
         sf_c1.cell(row=1, column=1).value = "이름"
-        sf_c1.cell(row=1, column=2).value = "출석 수"
-        sf_c1.cell(row=1, column=3).value = "총 결석 수"
-        sf_c1.cell(row=1, column=4).value = "결석 수"
-        sf_c1.cell(row=1, column=5).value = "지각 수"
-        sf_c1.cell(row=1, column=6).value = "조퇴 수"
+        sf_c1.cell(row=1, column=2).value = "총 결석 수"
+        sf_c1.cell(row=1, column=3).value = "결석 수"
+        sf_c1.cell(row=1, column=4).value = "지각 수"
+        sf_c1.cell(row=1, column=5).value = "조퇴 수"
 
         sf_c2.title = "2교시"
         sf_c2.cell(row=1, column=1).value = "이름"
-        sf_c2.cell(row=1, column=2).value = "출석 수"
-        sf_c2.cell(row=1, column=3).value = "총 결석 수"
-        sf_c2.cell(row=1, column=4).value = "결석 수"
-        sf_c2.cell(row=1, column=5).value = "지각 수"
-        sf_c2.cell(row=1, column=6).value = "조퇴 수"
+        sf_c2.cell(row=1, column=2).value = "총 결석 수"
+        sf_c2.cell(row=1, column=3).value = "결석 수"
+        sf_c2.cell(row=1, column=4).value = "지각 수"
+        sf_c2.cell(row=1, column=5).value = "조퇴 수"
 
         for user in self.user_names:
             row = self.data[user]["id"] + 2
 
             sf_c1.cell(row=row, column=1).value = user
-            sf_c1.cell(row=row, column=2).value = self.data[user]["attend_count"]
-            sf_c1.cell(row=row, column=3).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
-            sf_c1.cell(row=row, column=4).value = self.data[user]["absent_count"]
-            sf_c1.cell(row=row, column=5).value = self.data[user]["late_count"]
-            sf_c1.cell(row=row, column=6).value = self.data[user]["early_leave_count"]
+            sf_c1.cell(row=row, column=2).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
+            sf_c1.cell(row=row, column=3).value = self.data[user]["absent_count"]
+            sf_c1.cell(row=row, column=4).value = self.data[user]["late_count"]
+            sf_c1.cell(row=row, column=5).value = self.data[user]["early_leave_count"]
 
             sf_c2.cell(row=row, column=1).value = user
-            sf_c2.cell(row=row, column=2).value = self.data[user]["attend_count"]
-            sf_c2.cell(row=row, column=3).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
-            sf_c2.cell(row=row, column=4).value = self.data[user]["absent_count"]
-            sf_c2.cell(row=row, column=5).value = self.data[user]["late_count"]
-            sf_c2.cell(row=row, column=6).value = self.data[user]["early_leave_count"]
+            sf_c2.cell(row=row, column=2).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
+            sf_c2.cell(row=row, column=3).value = self.data[user]["absent_count"]
+            sf_c2.cell(row=row, column=4).value = self.data[user]["late_count"]
+            sf_c2.cell(row=row, column=5).value = self.data[user]["early_leave_count"]
 
         schedule_files.save(self.path_schedule)
 
@@ -118,7 +127,7 @@ class attendance:
         sf_c2 = schedule_files['2교시']
         today_date = str(datetime.today().strftime("%Y-%m-%d")) + f" {self.day[datetime.today().weekday()]}"
         print(today_date)
-        self.col_num_schedule = 7
+        self.col_num_schedule = 6
         while True: 
             date = sf_c1.cell(row=1, column=self.col_num_schedule).value
             if date == None and date != today_date:
@@ -151,61 +160,111 @@ class attendance:
         sf_c1 = schedule_files['1교시']
         sf_c2 = schedule_files['2교시']
 
-        for us in users:
-            row = self.data[us]["id"] + 2
+        for user in users:
+            row = self.data[user]["id"] + 2
              
-            sf_c1.cell(row=row, column=2).value = self.data[user]["attend_count"]
-            sf_c1.cell(row=row, column=3).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
-            sf_c1.cell(row=row, column=4).value = self.data[user]["absent_count"]
-            sf_c1.cell(row=row, column=5).value = self.data[user]["late_count"]
-            sf_c1.cell(row=row, column=6).value = self.data[user]["early_leave_count"]
+            # sf_c1.cell(row=row, column=2).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
+            # sf_c1.cell(row=row, column=3).value = self.data[user]["absent_count"]
+            # sf_c1.cell(row=row, column=4).value = self.data[user]["late_count"]
+            # sf_c1.cell(row=row, column=5).value = self.data[user]["early_leave_count"]
             sf_c1.cell(row=row, column=self.col_num_schedule).value = self.data[user]["first_check_time"]
 
-            sf_c2.cell(row=row, column=2).value = self.data[user]["attend_count"]
-            sf_c2.cell(row=row, column=3).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
-            sf_c2.cell(row=row, column=4).value = self.data[user]["absent_count"]
-            sf_c2.cell(row=row, column=5).value = self.data[user]["late_count"]
-            sf_c2.cell(row=row, column=6).value = self.data[user]["early_leave_count"]
+            # sf_c2.cell(row=row, column=2).value = self.sum_absent_count(self.data[user]["absent_count"], self.data[user]["late_count"], self.data[user]["early_leave_count"])
+            # sf_c2.cell(row=row, column=3).value = self.data[user]["absent_count"]
+            # sf_c2.cell(row=row, column=4).value = self.data[user]["late_count"]
+            # sf_c2.cell(row=row, column=5).value = self.data[user]["early_leave_count"]
             sf_c2.cell(row=row, column=self.col_num_schedule).value = self.data[user]["second_check_time"]      
 
         schedule_files.save(self.path_schedule)
 
     def attend_check(self, user, class_time):
-        time = str(datetime.today().strftime("%H:%M:%S"))
         if class_time == 1:
-            self.data[user]["attend_count"] = self.data[user]["attend_count"] + 1
-            self.data[user]["first_check_time"] = time
-        elif class_time == 2:
-            self.data[user]["second_check_time"] = time
+            self.data[user]["first_check_time"] = "출석"
+
+        elif class_time == 2 and self.data[user]["second_day"] != []:    
+            self.data[user]["second_check_time"] = "출석"
+
 
     def absent_check(self, user, class_time):
+        # print(f"{class_time} jk")
         if class_time == 1:
-            self.data[user]["absent_count"] = self.data[user]["absent_count"] + 1
             self.data[user]["first_check_time"] = "결석"
-        elif class_time == 2:
-            if self.data[user]["first_check_time"] == "출석" or "지각" in self.data[user]["first_check_time"]:
-                self.data[user]["attend_count"] = self.data[user]["attend_count"] - 1
-                self.data[user]["early_leave_count"] = self.data[user]["early_leave_count"] + 1
-                
+
+        elif class_time == 2 and self.data[user]["second_day"] != []:    
             self.data[user]["second_check_time"] = "결석"
 
+            
+
     def late_check(self, user, class_time):
-        time = str(datetime.today().strftime("%H:%M:%S"))
         if class_time == 1:
-            self.data[user]["late_count"] = self.data[user]["late_count"] + 1
-            self.data[user]["first_check_time"] = f"지각 - {time}"
-        elif class_time == 2:
-            self.data[user]["late_count"] = self.data[user]["late_count"] + 1
-            self.data[user]["second_check_time"] = f"지각 - {time}"
+            self.data[user]["first_check_time"] = "지각"
+
+        elif class_time == 2 and self.data[user]["second_day"] != []:    
+            self.data[user]["second_check_time"] = "지각"
+
 
     def early_leave_check(self, user, class_time):
         if class_time == 1:
-            self.data[user]["early_leave_count"] = self.data[user]["early_leave_count"] + 1
             self.data[user]["first_check_time"] = "조퇴"
-        elif class_time == 2:
-            if self.data[user]["first_check_time"] != "조퇴":
-                self.data[user]["early_leave_count"] = self.data[user]["early_leave_count"] + 1
+
+        elif class_time == 2 and self.data[user]["second_day"] != []:    
             self.data[user]["second_check_time"] = "조퇴"
+
+    def schedule_count(self):
+        schedule_files = openpyxl.load_workbook(self.path_schedule)
+        sf_c1 = schedule_files['1교시']
+        sf_c2 = schedule_files['2교시']
+
+        for user in self.attend_user_names:
+            row = self.data[user]["id"] + 2
+            late = 0
+            absent = 0
+            early = 0
+
+            for col in range(6, self.col_num_schedule + 1):
+                first = sf_c1.cell(row=row, column=col).value
+                second = sf_c2.cell(row=row, column=col).value
+
+                if first == "출석":
+                    if second == "출석" or second == None:
+                        pass
+                        
+                    elif second == "지각":
+                        late = late + 1
+                    
+                    elif second == "결석" or second == "조퇴":
+                        early = early + 1
+
+                elif first == "지각":
+                    late = late + 1
+
+                    if second == "출석" or second == None:
+                        pass
+                        
+                    elif second == "지각":
+                        late = late + 1
+                    
+                    elif second == "결석" or second == "조퇴":
+                        early = early + 1
+
+                elif first == "조퇴":
+                    early = early + 1
+                
+                elif first == "결과":
+                    absent = absent + 1
+            
+            sf_c1.cell(row=row, column=2).value = self.sum_absent_count(absent, late, early)
+            sf_c1.cell(row=row, column=3).value = absent
+            sf_c1.cell(row=row, column=4).value = late
+            sf_c1.cell(row=row, column=5).value = early
+
+            sf_c2.cell(row=row, column=2).value = self.sum_absent_count(absent, late, early)
+            sf_c2.cell(row=row, column=3).value = absent
+            sf_c2.cell(row=row, column=4).value = late
+            sf_c2.cell(row=row, column=5).value = early
+
+        schedule_files.save(self.path_schedule)
+
 
     def sum_absent_count(self, absent_count, late_count, early_leave_count):
         sum_absent = absent_count + (late_count + early_leave_count) // 3   
