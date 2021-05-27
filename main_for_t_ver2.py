@@ -76,9 +76,9 @@ class attendance:
 
         for user in users:
             row = self.data[user]["id"] + 2
-            data_xlsx.cell(row=row, column=4).value = sf.cell(row=row, column=3).value
+            data_xlsx.cell(row=row, column=4).value = sf.cell(row=row, column=5).value
             data_xlsx.cell(row=row, column=5).value = sf.cell(row=row, column=4).value
-            data_xlsx.cell(row=row, column=6).value = sf.cell(row=row, column=5).value
+            data_xlsx.cell(row=row, column=6).value = sf.cell(row=row, column=2).value
         
         data_files.save(self.path_data)
 
@@ -215,7 +215,7 @@ class attendance:
         sf_c1 = schedule_files['1교시']
         sf_c2 = schedule_files['2교시']
 
-        for user in self.attend_user_names:
+        for user in self.user_names:
             row = self.data[user]["id"] + 2
             late = 0
             absent = 0
@@ -250,7 +250,7 @@ class attendance:
                 elif first == "조퇴":
                     early = early + 1
                 
-                elif first == "결과":
+                elif first == "결석":
                     absent = absent + 1
             
             sf_c1.cell(row=row, column=2).value = self.sum_absent_count(absent, late, early)
