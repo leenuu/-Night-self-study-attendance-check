@@ -1,4 +1,5 @@
 from datetime import datetime
+from PyQt5.sip import delete
 import openpyxl
 import os
 
@@ -174,8 +175,8 @@ class attendance:
             # sf_c2.cell(row=row, column=4).value = self.data[user]["late_count"]
             # sf_c2.cell(row=row, column=5).value = self.data[user]["early_leave_count"]
             sf_c2.cell(row=row, column=self.col_num_schedule).value = self.data[user]["second_check_time"]      
-
-        schedule_files.save(self.path_schedule)
+            print(user, self.data[user]["first_check_time"] ,self.data[user]["second_check_time"])
+        schedule_files.save(self.path_schedule)     
 
     def attend_check(self, user, class_time):
         if class_time == 1:
@@ -252,7 +253,24 @@ class attendance:
                 
                 elif first == "결석":
                     absent = absent + 1
-            
+
+
+                if first == None and second == "출석":
+                    pass
+
+                elif first == None and second == "지각":
+                    late = late + 1
+
+                elif first == None and second == "조퇴":
+                    early = early + 1
+                
+                elif first == None and second == "결석":
+                    absent = absent + 1
+
+
+
+
+
             sf_c1.cell(row=row, column=2).value = self.sum_absent_count(absent, late, early)
             sf_c1.cell(row=row, column=3).value = absent
             sf_c1.cell(row=row, column=4).value = late
@@ -270,6 +288,42 @@ class attendance:
         sum_absent = absent_count + (late_count + early_leave_count) // 3   
         return sum_absent
 
+    def delete_check(self):
+        data_files = openpyxl.load_workbook(self.path_data)
+        data_xlsx = data_files.active     
+        
+        row = 2
+        delete_user = list()
+        st = 0
+
+        while True:
+            if data_xlsx.cell(row=row, column=1).value != None:
+                if data_xlsx.cell(row=row, column=6).value >= 2:
+                    user = str(data_xlsx.cell(row=row, column=1).value)
+                    delete_user.append(user)
+                    st = 1
+                row = row + 1
+
+            elif data_xlsx.cell(row=row, column=1).value == None:
+                break
+
+        if st == 1:
+            return delete_user
+        else:
+            return 1
+
+    def delete_user(self, user):
+        data_files = openpyxl.load_workbook(self.path_data)
+        data_xlsx = data_files.active   
+        schedule_files = openpyxl.load_workbook(self.path_schedule)
+        sf_c1 = schedule_files['1교시']
+        sf_c2 = schedule_files['2교시']
+
+        col = self.data[user]['id'] + 2
+
+        print(col)
+
+        
 # att = attendance()
 
 # att.save_schedule()
