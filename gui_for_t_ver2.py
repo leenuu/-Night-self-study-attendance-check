@@ -11,6 +11,7 @@ class Ui_Form(object):
         self.frames = dict()
         self.brts = dict()
         self.attend_users = self.set_attend_users()
+        self.delete_users = self.att.delete_check()
         self.att.attend_user_names = self.attend_users
         self.change_users = list()
         self.init_connect = 1
@@ -30,9 +31,19 @@ class Ui_Form(object):
         self.label_txt.setFont(font)
         self.label_txt.setAlignment(QtCore.Qt.AlignCenter)
         self.label_txt.setObjectName("label_txt")
-    
+
+        self.delete_brt = QtWidgets.QPushButton(Form)
+        self.delete_brt.setGeometry(QtCore.QRect(1510, 220, 141, 41))
+        font = QtGui.QFont()
+        font.setFamily("한컴산뜻돋움")
+        font.setPointSize(18)
+        font.setBold(False)
+        font.setWeight(50)
+        self.delete_brt.setFont(font)
+        self.delete_brt.setObjectName("delete_brt")
+
         self.save_brt = QtWidgets.QPushButton(Form)
-        self.save_brt.setGeometry(QtCore.QRect(1360, 220, 291, 41))
+        self.save_brt.setGeometry(QtCore.QRect(1360, 220, 141, 41))
         font = QtGui.QFont()
         font.setFamily("한컴산뜻돋움")
         font.setPointSize(20)
@@ -139,23 +150,31 @@ class Ui_Form(object):
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
+        if type(self.delete_users) == int:
+            self.delete_brt.setDisabled(True)    
+
         self.first_class.setDisabled(True)
         self.attend.setChecked(True)
+
         self.save_brt.clicked.connect(self.save)
+        self.delete_brt.clicked.connect(self.delete_user)
         self.first_class.clicked.connect(self.switching_class_time)
         self.second_class.clicked.connect(self.switching_class_time)
         self.attend.clicked.connect(self.class_time_radio)
         self.absent.clicked.connect(self.class_time_radio)
         self.ealy.clicked.connect(self.class_time_radio)
         self.late.clicked.connect(self.class_time_radio)
+        
         self.setup_pos()
         self.mapping()
+
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label_txt.setText(_translate("Form", ""))
         self.save_brt.setText(_translate("Form", "저장"))
+        self.delete_brt.setText(_translate("Form", "삭제"))
         self.attend.setText(_translate("Form", "  출 석"))
         self.absent.setText(_translate("Form", "  결 석"))
         self.late.setText(_translate("Form", "  지 각"))
@@ -163,7 +182,12 @@ class Ui_Form(object):
         self.first_class.setText(_translate("Form", "1 교시"))
         self.second_class.setText(_translate("Form", "2 교시"))
         self.memo.setPlainText(_translate("Form", self.log))
-    
+        
+    def delete_user(self):
+        self.delete_brt.setDisabled(True)
+        for us in self.delete_users:
+            self.att.delete_user(us)
+
     def save(self):
         _translate = QtCore.QCoreApplication.translate
         self.log = self.memo.toPlainText()
@@ -220,8 +244,9 @@ class Ui_Form(object):
     def set_attend_users(self):
         users = list()
         for user in self.att.user_names:
-            if self.att.day[datetime.today().weekday()] in self.att.data[user]["first_day"]:
+            if self.att.day[datetime.today().weekday()] in self.att.data[user]["first_day"] or self.att.day[datetime.today().weekday()] in self.att.data[user]["second_day"]:
                 users.append(user)
+
         return users
 
     def change_brt_color(self, state, user):
@@ -268,35 +293,56 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         if self.class_time == 1:
             for us in self.attend_users:
+                
                 brt = self.brts[f"{self.att.data[us]['pos']}"]
                 if self.init_connect == 1:
+                    print("1, init_connect")
                     brt[0].clicked.connect(lambda state, user=us: self.change_brt_color(state, user))
-                    brt[1] = 1
-                brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
-                brt[0].setDisabled(False)
-                if self.att.data[us]['first_check_time'] == None or self.att.data[us]['first_check_time'] == "출석":
-                    brt[1] = 1
-                elif self.att.data[us]['first_check_time'] == "결석":
-                    brt[1] = 2
-                elif self.att.data[us]['first_check_time'] == "지각":
-                    brt[1] = 3
-                elif self.att.data[us]['first_check_time'] == "조퇴":
-                    brt[1] = 4
+
+                if self.att.day[datetime.today().weekday()] in self.att.data[us]['first_day']:
+
+                    brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
+                    brt[0].setDisabled(False)
+                    
+                    if us in self.delete_users:
+                        brt[1] = 5
+                        
+                    if brt[1] != 5:
+                        if self.att.data[us]['first_check_time'] == None or self.att.data[us]['first_check_time'] == "출석":
+                            brt[1] = 1
+                        elif self.att.data[us]['first_check_time'] == "결석":
+                            brt[1] = 2
+                        elif self.att.data[us]['first_check_time'] == "지각":
+                            brt[1] = 3
+                        elif self.att.data[us]['first_check_time'] == "조퇴":
+                            brt[1] = 4
 
 
-                if brt[1] == 1:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-                    # brt[0].setDisabled(True)
-                elif brt[1] == 2:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#fc0000")
-                    # brt[0].setDisabled(True)
-                elif brt[1] == 3:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
-                    # brt[0].setDisabled(True)
-                elif brt[1] == 4:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9966ff")
-                    # brt[0].setDisabled(True)
-                print(us, brt[1])
+                    if brt[1] == 1:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 2:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#fc0000")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 3:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 4:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9966ff")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 5:
+                        brt[0].setDisabled(True)
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+
+                    print(us, brt[1], self.att.data[us]['first_day'])
+
+                else:
+                    print(us)
+                    brt = self.brts[f"{self.att.data[us]['pos']}"]
+                    brt[0].setText(_translate("Form", ""))
+                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#323232") 
+                    brt[0].setDisabled(True) 
+                    brt[1] = 0               
     
         elif self.class_time == 2:
             for us in self.attend_users:
@@ -305,20 +351,26 @@ class Ui_Form(object):
                     # if self.att.day[datetime.today().weekday()] in self.att.data[us]['second_day']:
                     brt = self.brts[f"{self.att.data[us]['pos']}"]
                     if self.init_connect == 1:
+                        print("2, init_connect")
                         brt[0].clicked.connect(lambda state, user=us: self.change_brt_color(state, user))
+
                     brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
                     brt[0].setDisabled(False)
-                    
-                    if self.att.data[us]['second_check_time'] == None or self.att.data[us]['second_check_time'] == "출석":
-                        brt[1] = 1
-                    elif self.att.data[us]['second_check_time'] == "결석":
-                        brt[1] = 2
-                    elif self.att.data[us]['second_check_time'] == "지각":
-                        brt[1] = 3
-                    elif self.att.data[us]['second_check_time'] == "조퇴":
-                        brt[1] = 4                            
 
-                    
+                    if us in self.delete_users:
+                        brt[1] = 5
+
+                    if brt[1] != 5:
+                        if self.att.data[us]['second_check_time'] == None or self.att.data[us]['second_check_time'] == "출석":
+                            brt[1] = 1
+                        elif self.att.data[us]['second_check_time'] == "결석":
+                            brt[1] = 2
+                        elif self.att.data[us]['second_check_time'] == "지각":
+                            brt[1] = 3
+                        elif self.att.data[us]['second_check_time'] == "조퇴":
+                            brt[1] = 4                            
+
+
                     if brt[1] == 1:
                         brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
                         # brt[0].setDisabled(True)
@@ -331,7 +383,12 @@ class Ui_Form(object):
                     elif brt[1] == 4:
                         brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9966ff")
                         # brt[0].setDisabled(True)
-                    print(us, brt[1])
+                    elif brt[1] == 5:
+                        brt[0].setDisabled(True)
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+
+                    print(us, brt[1], self.att.data[us]['second_check_time'])
+
 
                 else:
                     print(us)
@@ -339,6 +396,7 @@ class Ui_Form(object):
                     brt[0].setText(_translate("Form", ""))
                     brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#323232") 
                     brt[0].setDisabled(True)
+                    brt[1] = 0 
 
         if self.init_connect == 1:
             self.init_connect = 0
@@ -347,48 +405,24 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         if self.class_time == 1:
             for us in self.change_users:
-                brt = self.brts[f"{self.att.data[us]['pos']}"]
-                brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
-                brt[0].setDisabled(False)
-                if self.att.data[us]['first_check_time'] == None or self.att.data[us]['first_check_time'] == "출석" :
-                    brt[1] = 1
-                elif self.att.data[us]['first_check_time'] == "결석":
-                    brt[1] = 2
-                elif self.att.data[us]['first_check_time'] == "지각":
-                    brt[1] = 3
-                elif self.att.data[us]['first_check_time'] == "조퇴":
-                    brt[1] = 4
-                    
-
-                if brt[1] == 1:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
-                    # brt[0].setDisabled(True)
-                elif brt[1] == 2:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#fc0000")
-                    # brt[0].setDisabled(True)
-                elif brt[1] == 3:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
-                    # brt[0].setDisabled(True)
-                elif brt[1] == 4:
-                    brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9966ff")
-                    # brt[0].setDisabled(True)
-                print(us, brt[1])
-
-        elif self.class_time == 2:
-            for us in self.change_users:
-                if self.att.day[datetime.today().weekday()] in self.att.data[us]['second_day']:
+                if self.att.day[datetime.today().weekday()] in self.att.data[us]['first_day']:
                     brt = self.brts[f"{self.att.data[us]['pos']}"]
                     brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
                     brt[0].setDisabled(False)
-                    
-                    if self.att.data[us]['second_check_time'] == None or self.att.data[us]['second_check_time'] == "출석":
-                        brt[1] = 1
-                    elif self.att.data[us]['second_check_time'] == "결석":
-                        brt[1] = 2
-                    elif self.att.data[us]['second_check_time'] == "지각" :
-                        brt[1] = 3
-                    elif self.att.data[us]['second_check_time'] == "조퇴":
-                        brt[1] = 4
+
+                    if us in self.delete_users:
+                        brt[1] = 5
+
+                    if brt[1] != 5:
+
+                        if self.att.data[us]['first_check_time'] == None or self.att.data[us]['first_check_time'] == "출석" :
+                            brt[1] = 1
+                        elif self.att.data[us]['first_check_time'] == "결석":
+                            brt[1] = 2
+                        elif self.att.data[us]['first_check_time'] == "지각":
+                            brt[1] = 3
+                        elif self.att.data[us]['first_check_time'] == "조퇴":
+                            brt[1] = 4
                         
 
                     if brt[1] == 1:
@@ -403,6 +437,48 @@ class Ui_Form(object):
                     elif brt[1] == 4:
                         brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9966ff")
                         # brt[0].setDisabled(True)
+                    elif brt[1] == 5:
+                        brt[0].setDisabled(True)
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
+                    print(us, brt[1])
+
+        elif self.class_time == 2:
+            for us in self.change_users:
+                if self.att.day[datetime.today().weekday()] in self.att.data[us]['second_day']:
+                    brt = self.brts[f"{self.att.data[us]['pos']}"]
+                    brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
+                    brt[0].setDisabled(False)
+
+                    if us in self.delete_users:
+                        brt[1] = 5
+
+                    if brt[1] != 5:
+
+                        if self.att.data[us]['second_check_time'] == None or self.att.data[us]['second_check_time'] == "출석":
+                            brt[1] = 1
+                        elif self.att.data[us]['second_check_time'] == "결석":
+                            brt[1] = 2
+                        elif self.att.data[us]['second_check_time'] == "지각" :
+                            brt[1] = 3
+                        elif self.att.data[us]['second_check_time'] == "조퇴":
+                            brt[1] = 4
+                        
+
+                    if brt[1] == 1:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 2:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#fc0000")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 3:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#ffff4d")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 4:
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9966ff")
+                        # brt[0].setDisabled(True)
+                    elif brt[1] == 5:
+                        brt[0].setDisabled(True)
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#9c9c9c")
                     print(us, brt[1])
 
                 elif self.att.data[us]['second_day'] == []:
