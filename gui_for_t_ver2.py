@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from datetime import datetime
 from main_for_t_ver2 import attendance
 import time
+import sys
  
 class Ui_Form(object):
     def __init__(self):
@@ -19,6 +20,9 @@ class Ui_Form(object):
         self.init_save_2 = 1
         self.class_time = 1
         self.color_changes = 1
+        self.delete_st = 0
+        self.check_data_error = 0
+
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -165,6 +169,11 @@ class Ui_Form(object):
         self.ealy.clicked.connect(self.class_time_radio)
         self.late.clicked.connect(self.class_time_radio)
         
+        self.check_data_error = self.att.check_data()
+        if self.check_data_error == 1:
+            print("errors")
+            sys.exit()
+
         self.setup_pos()
         self.mapping()
 
@@ -184,9 +193,27 @@ class Ui_Form(object):
         self.memo.setPlainText(_translate("Form", self.log))
         
     def delete_user(self):
-        self.delete_brt.setDisabled(True)
+
+        self.delete_st = 1
+        for us in self.delete_users:
+            brt = self.brts[f"{self.att.data[us]['pos']}"]
+            brt[1] = -1
+
+        self.mapping()
+
         for us in self.delete_users:
             self.att.delete_user(us)
+            
+        self.att.user_names = list()
+        self.att.attend_user_names = list()
+        self.delete_users = 1
+        self.att.data = self.att.data_load()    
+        self.attend_users = self.set_attend_users()
+        self.att.attend_user_names = self.attend_users
+        self.init_save = 1
+        self.init_save_2 = 1
+        
+        self.delete_brt.setDisabled(True)
 
     def save(self):
         _translate = QtCore.QCoreApplication.translate
@@ -304,10 +331,14 @@ class Ui_Form(object):
                     brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
                     brt[0].setDisabled(False)
                     
-                    if us in self.delete_users:
-                        brt[1] = 5
-                        
-                    if brt[1] != 5:
+                    if type(self.delete_users) == list and self.delete_st == 0:
+                        if us in self.delete_users:
+                            brt[1] = 5
+                    
+                    if brt[1] == -1:
+                        brt[1] = 0
+
+                    elif brt[1] != 5:
                         if self.att.data[us]['first_check_time'] == None or self.att.data[us]['first_check_time'] == "출석":
                             brt[1] = 1
                         elif self.att.data[us]['first_check_time'] == "결석":
@@ -317,8 +348,11 @@ class Ui_Form(object):
                         elif self.att.data[us]['first_check_time'] == "조퇴":
                             brt[1] = 4
 
+                    if brt[1] == 0: 
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#323232")
+                        brt[0].setText(_translate("Form", ""))
 
-                    if brt[1] == 1:
+                    elif brt[1] == 1:
                         brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
                         # brt[0].setDisabled(True)
                     elif brt[1] == 2:
@@ -357,10 +391,13 @@ class Ui_Form(object):
                     brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
                     brt[0].setDisabled(False)
 
-                    if us in self.delete_users:
-                        brt[1] = 5
+                    if type(self.delete_users) == list and self.delete_st == 0:
+                        if us in self.delete_users:
+                            brt[1] = 5
+                    if brt[1] == -1:
+                        brt[1] = 0
 
-                    if brt[1] != 5:
+                    elif brt[1] != 5:
                         if self.att.data[us]['second_check_time'] == None or self.att.data[us]['second_check_time'] == "출석":
                             brt[1] = 1
                         elif self.att.data[us]['second_check_time'] == "결석":
@@ -368,10 +405,12 @@ class Ui_Form(object):
                         elif self.att.data[us]['second_check_time'] == "지각":
                             brt[1] = 3
                         elif self.att.data[us]['second_check_time'] == "조퇴":
-                            brt[1] = 4                            
+                            brt[1] = 4   
 
-
-                    if brt[1] == 1:
+                    if brt[1] == 0: 
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#323232")
+                        brt[0].setText(_translate("Form", "")) 
+                    elif brt[1] == 1:
                         brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
                         # brt[0].setDisabled(True)
                     elif brt[1] == 2:
@@ -410,10 +449,13 @@ class Ui_Form(object):
                     brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
                     brt[0].setDisabled(False)
 
-                    if us in self.delete_users:
-                        brt[1] = 5
+                    if type(self.delete_users) == list and self.delete_st == 0:
+                        if us in self.delete_users:
+                            brt[1] = 5
+                    if brt[1] == -1:
+                        brt[1] = 0
 
-                    if brt[1] != 5:
+                    elif brt[1] != 5:
 
                         if self.att.data[us]['first_check_time'] == None or self.att.data[us]['first_check_time'] == "출석" :
                             brt[1] = 1
@@ -424,8 +466,10 @@ class Ui_Form(object):
                         elif self.att.data[us]['first_check_time'] == "조퇴":
                             brt[1] = 4
                         
-
-                    if brt[1] == 1:
+                    if brt[1] == 0: 
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#323232")
+                        brt[0].setText(_translate("Form", ""))
+                    elif brt[1] == 1:
                         brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
                         # brt[0].setDisabled(True)
                     elif brt[1] == 2:
@@ -449,10 +493,13 @@ class Ui_Form(object):
                     brt[0].setText(_translate("Form", f"{us}\n{self.att.data[us]['pos']}"))
                     brt[0].setDisabled(False)
 
-                    if us in self.delete_users:
-                        brt[1] = 5
+                    if type(self.delete_users) == list and self.delete_st == 0:
+                        if us in self.delete_users:
+                            brt[1] = 5
+                    if brt[1] == -1:
+                        brt[1] = 0
 
-                    if brt[1] != 5:
+                    elif brt[1] != 5:
 
                         if self.att.data[us]['second_check_time'] == None or self.att.data[us]['second_check_time'] == "출석":
                             brt[1] = 1
@@ -463,8 +510,10 @@ class Ui_Form(object):
                         elif self.att.data[us]['second_check_time'] == "조퇴":
                             brt[1] = 4
                         
-
-                    if brt[1] == 1:
+                    if brt[1] == 0: 
+                        brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#323232")
+                        brt[0].setText(_translate("Form", ""))
+                    elif brt[1] == 1:
                         brt[0].setStyleSheet("QWidget { background-color: %s }" %  "#02f800")
                         # brt[0].setDisabled(True)
                     elif brt[1] == 2:
@@ -583,7 +632,6 @@ class Ui_Form(object):
             n = n + 1
 
 if __name__ == "__main__":
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QWidget()
     ui = Ui_Form()
