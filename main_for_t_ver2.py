@@ -28,6 +28,31 @@ class attendance:
         except FileNotFoundError:
             self.log_init()
 
+    def check_data(self):
+        schedule_files = openpyxl.load_workbook(self.path_schedule)
+        sf_c1 = schedule_files['1교시']
+        sf_c2 = schedule_files['2교시']        
+        data_files = openpyxl.load_workbook(self.path_data)
+        data_xlsx = data_files.active  
+        row = 2
+
+        while True:
+            
+            if data_xlsx.cell(row=row, column=1).value == sf_c1.cell(row=row, column=1).value and sf_c1.cell(row=row, column=1).value == sf_c2.cell(row=row, column=1).value:
+                pass
+
+            elif data_xlsx.cell(row=row, column=1).value == None and sf_c1.cell(row=row, column=1).value == None and sf_c2.cell(row=row, column=1).value == None:
+                break
+
+            else:
+                print("error")
+                return 1
+
+            row = row + 1
+
+        print("pass")
+        return 0
+
     def log_init(self):
         with open(self.path_log, "w") as f:
             pass
@@ -126,7 +151,7 @@ class attendance:
         schedule_files = openpyxl.load_workbook(self.path_schedule)
         sf_c1 = schedule_files['1교시']
         sf_c2 = schedule_files['2교시']
-        today_date = str(datetime.today().strftime("%Y-%m-%d")) + f" {self.day[datetime.today().weekday()]}"
+        today_date = str(datetime.today().strftime("%m-%d")) + f" {self.day[datetime.today().weekday()]}"
         print(today_date)
         self.col_num_schedule = 6
         while True: 
@@ -255,7 +280,7 @@ class attendance:
                     absent = absent + 1
 
 
-                if first == None and second == "출석":
+                elif first == None and second == "출석":
                     pass
 
                 elif first == None and second == "지각":
@@ -298,7 +323,7 @@ class attendance:
 
         while True:
             if data_xlsx.cell(row=row, column=1).value != None:
-                if data_xlsx.cell(row=row, column=6).value >= 2:
+                if data_xlsx.cell(row=row, column=6).value >= 3:
                     user = str(data_xlsx.cell(row=row, column=1).value)
                     delete_user.append(user)
                     st = 1
@@ -319,9 +344,15 @@ class attendance:
         sf_c1 = schedule_files['1교시']
         sf_c2 = schedule_files['2교시']
 
-        col = self.data[user]['id'] + 2
+        row = self.data[user]['id'] + 2
 
-        print(col)
+        data_xlsx.delete_rows(row)
+        sf_c1.delete_rows(row)
+        sf_c2.delete_rows(row)
+
+        data_files.save(self.path_data)
+        schedule_files.save(self.path_schedule) 
+        print(row)
 
         
 # att = attendance()
