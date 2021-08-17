@@ -4,6 +4,9 @@ from main_for_t_ver2 import attendance
 import time
 import sys
  
+
+
+
 class Ui_Form(object):
     def __init__(self):
         self.att = attendance()
