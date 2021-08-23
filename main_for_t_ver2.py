@@ -111,9 +111,9 @@ class attendance:
             data_xlsx.cell(row=row, column=4).value = sf.cell(row=row, column=5).value
             data_xlsx.cell(row=row, column=5).value = sf.cell(row=row, column=4).value
             data_xlsx.cell(row=row, column=6).value = sf.cell(row=row, column=2).value
-            data_xlsx.cell(row=row, column=4).value = sf_2.cell(row=row, column=5).value
-            data_xlsx.cell(row=row, column=5).value = sf_2.cell(row=row, column=4).value
-            data_xlsx.cell(row=row, column=6).value = sf_2.cell(row=row, column=2).value
+            data_xlsx.cell(row=row, column=7).value = sf_2.cell(row=row, column=5).value
+            data_xlsx.cell(row=row, column=8).value = sf_2.cell(row=row, column=4).value
+            data_xlsx.cell(row=row, column=9).value = sf_2.cell(row=row, column=2).value
         
         data_files.save(self.path_data)
 
