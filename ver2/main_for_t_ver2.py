@@ -261,8 +261,11 @@ class attendance:
     def absent_check(self, user, class_time):
         # print(f"{class_time} jk")
         if class_time == 1:
-            self.data[user]["first_check_time"] = "결석"
-
+            if user == 9:
+                self.data[user]["first_check_time"] = "출석"
+            else:
+                self.data[user]["first_check_time"] = "결석"
+            
         elif class_time == 2 and self.data[user]["second_day"] != []:    
             self.data[user]["second_check_time"] = "결석"
 
